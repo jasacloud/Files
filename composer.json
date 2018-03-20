@@ -1,5 +1,5 @@
 {
-    "name": "jasacloud/Files",
+    "name": "jasacloud/files",
     "description": "Handle image or file upload download",
     "require": {
         "php": "^7.0",
