@@ -1,10 +1,7 @@
 {
     "name": "jasacloud/files",
     "description": "Library for handle image or file upload and download",
-    "keywords": ["Jasacloud",
-    "Files",
-    "Image",
-    "ImageServer"],
+    "keywords": ["Jasacloud","Files","Image","ImageServer"],
     "type": "library",
     "license": "MIT",
     "require": {
