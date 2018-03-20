@@ -1,0 +1,8 @@
+{
+    "name": "jasacloud/Files",
+    "description": "Handle image or file upload download",
+    "require": {
+        "php": "^7.0",
+        "another-vendor/package": "1.*"
+    }
+}
