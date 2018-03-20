@@ -1,25 +1,25 @@
 {
-	"name": "jasacloud/files",
-	"description": "Library for handle image or file upload and download",
-	"keywords": ["Jasacloud",
-	"Files",
-	"Image",
-	"ImageServer"],
-	"type": "library",
-	"license": "MIT",
-	"require": {
-		"php": "^7.0",
-		"another-vendor/package": "1.*"
-	},
-	"authors": [{
-		"name": "Dwi BudUt",
-		"email": "dwi@jasacloud.com",
-		"homepage": "https://www.jasacloud.com"
-	}],
-	"homepage": "http://github.com/jasacloud/files",
-	"autoload": {
-		"psr-0": {
-			"Files": "src/"
-		}
-	}
+    "name": "jasacloud/files",
+    "description": "Library for handle image or file upload and download",
+    "keywords": ["Jasacloud",
+    "Files",
+    "Image",
+    "ImageServer"],
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.0",
+        "another-vendor/package": "1.*"
+    },
+    "authors": [{
+        "name": "Dwi BudUt",
+        "email": "dwi@jasacloud.com",
+        "homepage": "https://www.jasacloud.com"
+    }],
+    "homepage": "http://github.com/jasacloud/files",
+    "autoload": {
+        "psr-0": {
+            "Files": "src/"
+        }
+    }
 }
