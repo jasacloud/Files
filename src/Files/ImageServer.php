@@ -1,6 +1,6 @@
 <?PHP
-namespace Files;
-require_once dirname(__FILE__).DIRECTORY_SEPARATOR."lib.qrcode/qrlib.php";
+
+use \QRCode;
 /* GET:
 	
 */

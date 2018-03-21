@@ -1,5 +1,4 @@
 <?PHP
-namespace Files;
 /**
  * @package     SimpleImage class
  * @version     2.5.6
