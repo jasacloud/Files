@@ -535,7 +535,7 @@ class SimpleImage{
         }
         $this->filename = $filename;
 		if($this->storage){
-			$this->imgrow = $this->storage->getSingleRow('image',['FID'=>$this->filename]);
+			$this->imgrow = $this->storage->getSingleRow('images',['FID'=>$this->filename]);
 			if($this->imgrow){
 				$this->load_base64($this->imgrow[0]['FData']);
 			}
@@ -915,7 +915,7 @@ class SimpleImage{
                 unset($info);
 				$this->source['FContentType'] = $mimetype;
 			}
-			$result = $this->storage->insert('image',$this->source);
+			$result = $this->storage->insert('images',$this->source);
 			if($result){
 				return true;
 			}
