@@ -1,5 +1,4 @@
 <?PHP
-	use QRCode;
     
 	/* GET:
 		
@@ -17,7 +16,7 @@
 		public function __construct(){
 			$this->default_host = (isset($_SERVER["HTTPS"])&&$_SERVER["HTTPS"]=="on"?"https":"http") . "://".$_SERVER["HTTP_HOST"];
 			
-			$this->imgroot= (defined(IMGROOT)) ? IMGROOT : "/img/img.upload/";
+			$this->imgroot= (defined("IMGROOT")) ? IMGROOT : "/img/img.upload/";
 			new Logger($_SERVER['DOCUMENT_ROOT']."/log/ImageServer.class.log", $_SERVER['PHP_SELF'].":". __LINE__ ."  "."Image:__construct() loaded!");
 		}
 		public function setImageRoot($rootimage=NULL){
