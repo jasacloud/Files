@@ -892,6 +892,23 @@ class SimpleImage{
 		return $this;
 	}
 	
+	function delete($source=null){
+		//define if want to save image into database storage :
+		if($this->storage && $source){
+			
+			$result = $this->storage->deleteRow('images',$source);
+			if($result){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else{
+			return false;
+		}
+	}
+	
     /**
      * Save an image
      *
