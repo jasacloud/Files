@@ -561,6 +561,11 @@ class SimpleImage{
 		}
 	}
 	
+	function getSource(){
+		
+		return $this->imgrow[0];
+	}
+	
     /**
      * Load a base64 string as image
      *
