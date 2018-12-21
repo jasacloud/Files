@@ -551,6 +551,7 @@ class SimpleImage{
 			$this->source['FContentType'] = $source['content_type'];
 			$this->source['FContentEncoded'] = $source['content_encoded'];
 			$this->source['FData'] = $source['data'];
+			$this->source['FTag'] = $source['tag'];
 			$this->source['FLastUpdate'] = date('Y-m-d H:i:s');
 			$this->source['FCreateDate'] = date('Y-m-d H:i:s');
 			
