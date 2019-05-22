@@ -528,7 +528,6 @@ class SimpleImage{
      *
      */
     function load($filename) {
-
         // Require GD library
         if (!extension_loaded('gd')) {
             throw new Exception('Required extension GD is not loaded.');
@@ -537,7 +536,15 @@ class SimpleImage{
 		if($this->storage){
 			$this->imgrow = $this->storage->getSingleRow('images',['FID'=>$this->filename]);
 			if($this->imgrow){
-				$this->load_base64($this->imgrow[0]['FData']);
+				$this->loadSource($this->imgrow[0]);
+				switch($this->imgrow[0]['FContentType']){
+					case 'application/pdf':
+						$this->load_base64($this->imgrow[0]['FData'],'application/pdf');
+					break;
+					default:
+						$this->load_base64($this->imgrow[0]['FData']);
+					break;
+				}
 			}
 		}
         return $this->get_meta_data();
@@ -546,15 +553,15 @@ class SimpleImage{
 	function loadSource($source=null){
 		if(is_array($source)){
 			//convert into DB Field
-			$this->source['FID'] = $source['id'];
-			$this->source['FName'] = $source['name'];
-			$this->source['FContentType'] = $source['content_type'];
-			$this->source['FContentEncoded'] = $source['content_encoded'];
-			$this->source['FData'] = $source['data'];
-			$this->source['FTag'] = $source['tag'];
-			$this->source['FGroup'] = $source['group'];
-			$this->source['FLastUpdate'] = date('Y-m-d H:i:s');
-			$this->source['FCreateDate'] = date('Y-m-d H:i:s');
+			$this->source['FID'] = $source['id'] ? $source['id'] : $source['FID'];
+			$this->source['FName'] = $source['name'] ? $source['name'] : $source['FName'];
+			$this->source['FContentType'] = $source['content_type'] ? $source['content_type'] : $source['FContentType'];
+			$this->source['FContentEncoded'] = $source['content_encoded'] ? $source['content_encoded'] : $source['FContentEncoded'];
+			$this->source['FData'] = $source['data'] ? $source['data'] : $source['FData'];
+			$this->source['FTag'] = $source['tag'] ? $source['tag'] : $source['FTag'];
+			$this->source['FGroup'] = $source['group'] ? $source['group'] : $source['FGroup'];
+			$this->source['FLastUpdate'] = $source['FLastUpdate'] ? $source['FLastUpdate'] : date('Y-m-d H:i:s');
+			$this->source['FCreateDate'] = $source['FCreateDate'] ? $source['FCreateDate'] : date('Y-m-d H:i:s');
 			
 			return $this;
 		}
@@ -576,13 +583,30 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function load_base64($base64string) {
+    function load_base64($base64string, $contentType=null) {
         if (!extension_loaded('gd')) {
             throw new Exception('Required extension GD is not loaded.');
         }
-        //remove data URI scheme and spaces from base64 string then decode it
-        $this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
-        $this->image = imagecreatefromstring($this->imagestring);
+		if($contentType) {
+			switch($contentType){
+				case 'application/pdf':
+					//remove data URI scheme and spaces from base64 string then decode it
+					$this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:application/[^;]+;base64,#', '', $base64string)));
+					//$this->image = imagecreatefromstring($this->imagestring);
+					//var_dump("ok");die;
+				break;
+				default:
+					//remove data URI scheme and spaces from base64 string then decode it
+					$this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
+					$this->image = imagecreatefromstring($this->imagestring);
+				break;
+			}
+		}else{
+			//remove data URI scheme and spaces from base64 string then decode it
+			$this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
+			$this->image = imagecreatefromstring($this->imagestring);
+		}
+       
         return $this->get_meta_data();
     }
 
@@ -655,10 +679,23 @@ class SimpleImage{
                 $mimetype = 'image/png';
                 break;
             default:
-                $info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
-                $mimetype = $info['mime'];
-                unset($info);
-                break;
+				if($this->source && isset($this->source["FContentType"])){
+					switch($this->source["FContentType"]){
+						case 'application/pdf' :
+							$mimetype = 'application/pdf';
+						break;
+						default;
+							$info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
+							$mimetype = $info['mime'];
+							unset($info);
+						break;
+					}
+				}else{
+					$info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
+					$mimetype = $info['mime'];
+					unset($info);
+				}
+				break;
         }
 
         // Output the image
@@ -673,6 +710,9 @@ class SimpleImage{
             case 'image/png':
                 imagepng($this->image, null, round(9 * $quality / 100));
                 break;
+			case 'application/pdf':
+				echo $this->imagestring;
+				break;
             default:
                 throw new Exception('Unsupported image format: '.$this->filename);
                 break;
@@ -707,6 +747,9 @@ class SimpleImage{
             case 'png':
                 $mimetype = 'image/png';
                 break;
+			case 'pdf':
+                $mimetype = 'application/pdf';
+                break;
             default:
                 $info = getimagesize($this->filename);
                 $mimetype = $info['mime'];
@@ -725,6 +768,9 @@ class SimpleImage{
                 break;
             case 'image/png':
                 imagepng($this->image, null, round(9 * $quality / 100));
+                break;
+			case 'application/pdf':
+                echo $this->imagestring;
                 break;
             default:
                 throw new Exception('Unsupported image format: '.$this->filename);
@@ -1169,10 +1215,22 @@ class SimpleImage{
      *
      */
     protected function get_meta_data() {
+		//filter content type :
+		if($this->source && isset($this->source["FContentType"])){
+			switch($this->source["FContentType"]){
+				case 'application/pdf' :
+					return $this;
+				break;
+				default;
+				break;
+			}
+		}
+		
         //gather meta data
         if(empty($this->imagestring)) {
-            $info = getimagesize($this->filename);
-
+			if(file_exists($this->filename)){
+				$info = getimagesize($this->filename);
+			}
             switch ($info['mime']) {
                 case 'image/gif':
                     $this->image = imagecreatefromgif($this->filename);
