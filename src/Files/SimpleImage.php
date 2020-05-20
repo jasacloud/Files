@@ -562,7 +562,9 @@ class SimpleImage{
 			$this->source['FGroup'] = $source['group'] ? $source['group'] : $source['FGroup'];
 			$this->source['FLastUpdate'] = $source['FLastUpdate'] ? $source['FLastUpdate'] : date('Y-m-d H:i:s');
 			$this->source['FCreateDate'] = $source['FCreateDate'] ? $source['FCreateDate'] : date('Y-m-d H:i:s');
-			
+			if($source['with_commit']){
+				$this->source['FCommit'] = "0";
+			}
 			return $this;
 		}
 		else{
@@ -961,7 +963,23 @@ class SimpleImage{
 			return false;
 		}
 	}
-	
+
+	function commit($source=null){
+		//define if want to save image into database storage :
+		if($this->storage && $source){
+			
+			$result = $this->storage->update('images',["FCommit"=>"1"],$source);
+			if($result){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else{
+			return false;
+		}
+	}
     /**
      * Save an image
      *
