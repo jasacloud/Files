@@ -549,7 +549,18 @@ class SimpleImage{
 		}
         return $this->get_meta_data();
     }
-	
+
+	function exist($filename){
+		if($this->storage){
+			$this->imgrow = $this->storage->getSingleRow('images',['FID'=>$filename]);
+			if($this->imgrow){
+				return $this->imgrow[0];
+			}
+			return false;
+		}
+		return $this->get_meta_data();
+	}
+
 	function loadSource($source=null){
 		if(is_array($source)){
 			//convert into DB Field
