@@ -552,6 +552,17 @@ class SimpleImage{
 
 	function exist($filename){
 		if($this->storage){
+			if(is_array($filename)){
+				$clause = ['FID'=>$filename];
+				if(get_class($this->storage->getConnection())=='DBMongo'){
+					$clause =	['FID'=>['$in'=>$filename]];
+				}
+				$this->imgrow = $this->storage->getAllRow('images',$clause);
+				if($this->imgrow){
+					return $this->imgrow;
+				}
+				return false;
+			}
 			$this->imgrow = $this->storage->getSingleRow('images',['FID'=>$filename]);
 			if($this->imgrow){
 				return $this->imgrow[0];
