@@ -546,7 +546,7 @@ class SimpleImage{
 					break;
 				}
 			}else{
-                throw new Exception('Image not found in database. (Ref: '.$this->filename.')');
+                throw new Exception('Object not found in database. (Ref: '.$this->filename.')');
             }
 		}
         return $this->get_meta_data();
