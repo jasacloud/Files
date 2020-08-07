@@ -545,7 +545,9 @@ class SimpleImage{
 						$this->load_base64($this->imgrow[0]['FData']);
 					break;
 				}
-			}
+			}else{
+                throw new Exception('Image not found in database. (Ref: '.$this->filename.')');
+            }
 		}
         return $this->get_meta_data();
     }
