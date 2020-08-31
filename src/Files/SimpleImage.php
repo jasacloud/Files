@@ -613,6 +613,9 @@ class SimpleImage{
         if (!extension_loaded('gd')) {
             throw new Exception('Required extension GD is not loaded.');
         }
+        if (!$base64string) {
+            throw new Exception('Image base64 string is null.');
+        }
 		if($contentType) {
 			switch($contentType){
 				case 'application/pdf':
@@ -698,6 +701,9 @@ class SimpleImage{
                 break;
             case 'jpeg':
             case 'jpg':
+                if (!$this->image) {
+                    throw new Exception('Image property is null : '.$this->filename);
+                }
                 imageinterlace($this->image, true);
                 $mimetype = 'image/jpeg';
                 break;
@@ -767,6 +773,9 @@ class SimpleImage{
                 break;
             case 'jpeg':
             case 'jpg':
+                if (!$this->image) {
+                    throw new Exception('Image property is null : '.$this->filename);
+                }
                 imageinterlace($this->image, true);
                 $mimetype = 'image/jpeg';
                 break;
@@ -1050,6 +1059,9 @@ class SimpleImage{
                 break;
             case 'jpg':
             case 'jpeg':
+                if (!$this->image) {
+                    throw new Exception('Image property is null : '.$this->filename);
+                }
                 imageinterlace($this->image, true);
                 $result = imagejpeg($this->image, $filename, round($quality));
                 break;
