@@ -1,4 +1,5 @@
 <?PHP
+
 /**
  * @package     SimpleImage class
  * @version     2.5.6
@@ -18,14 +19,15 @@
  * @package SimpleImage
  *
  */
-class SimpleImage{
+class SimpleImage
+{
 
     /**
      * @var int Default output image quality
      *
      */
     public $quality = 80;
-	
+
     protected $image, $filename, $original_info, $width, $height, $imagestring, $storage, $source, $imgrow;
 
     /**
@@ -42,7 +44,8 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function __construct($filename = null, $width = null, $height = null, $color = null) {
+    function __construct($filename = null, $width = null, $height = null, $color = null)
+    {
         if ($filename) {
             $this->load($filename);
         } elseif ($width) {
@@ -55,8 +58,9 @@ class SimpleImage{
      * Destroy image resource
      *
      */
-    function __destruct() {
-        if( isset($this->image) && get_resource_type($this->image) === 'gd' ) {
+    function __destruct()
+    {
+        if (isset($this->image) && get_resource_type($this->image) === 'gd') {
             imagedestroy($this->image);
         }
     }
@@ -74,10 +78,10 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function adaptive_resize($width, $height = null) {
+    function adaptive_resize($width, $height = null)
+    {
 
         return $this->thumbnail($width, $height);
-
     }
 
     /**
@@ -86,7 +90,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function auto_orient() {
+    function auto_orient()
+    {
 
         switch ($this->original_info['exif']['Orientation']) {
             case 1:
@@ -125,7 +130,6 @@ class SimpleImage{
         }
 
         return $this;
-
     }
 
     /**
@@ -139,7 +143,8 @@ class SimpleImage{
      * @return  SimpleImage
      *
      */
-    function best_fit($max_width, $max_height) {
+    function best_fit($max_width, $max_height)
+    {
 
         // If it already fits, there's nothing to do
         if ($this->width <= $max_width && $this->height <= $max_height) {
@@ -165,7 +170,6 @@ class SimpleImage{
         }
 
         return $this->resize($width, $height);
-
     }
 
     /**
@@ -177,7 +181,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function blur($type = 'selective', $passes = 1) {
+    function blur($type = 'selective', $passes = 1)
+    {
         switch (strtolower($type)) {
             case 'gaussian':
                 $type = IMG_FILTER_GAUSSIAN_BLUR;
@@ -200,7 +205,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function brightness($level) {
+    function brightness($level)
+    {
         imagefilter($this->image, IMG_FILTER_BRIGHTNESS, $this->keep_within($level, -255, 255));
         return $this;
     }
@@ -214,7 +220,8 @@ class SimpleImage{
      *
      *
      */
-    function contrast($level) {
+    function contrast($level)
+    {
         imagefilter($this->image, IMG_FILTER_CONTRAST, $this->keep_within($level, -100, 100));
         return $this;
     }
@@ -229,7 +236,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function colorize($color, $opacity) {
+    function colorize($color, $opacity)
+    {
         $rgba = $this->normalize_color($color);
         $alpha = $this->keep_within(127 - (127 * $opacity), 0, 127);
         imagefilter($this->image, IMG_FILTER_COLORIZE, $this->keep_within($rgba['r'], 0, 255), $this->keep_within($rgba['g'], 0, 255), $this->keep_within($rgba['b'], 0, 255), $alpha);
@@ -247,7 +255,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function create($width, $height = null, $color = null) {
+    function create($width, $height = null, $color = null)
+    {
 
         $height = $height ?: $width;
         $this->width = $width;
@@ -267,7 +276,6 @@ class SimpleImage{
         }
 
         return $this;
-
     }
 
     /**
@@ -281,7 +289,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function crop($x1, $y1, $x2, $y2) {
+    function crop($x1, $y1, $x2, $y2)
+    {
 
         // Determine crop size
         if ($x2 < $x1) {
@@ -305,7 +314,6 @@ class SimpleImage{
         $this->image = $new;
 
         return $this;
-
     }
 
     /**
@@ -316,12 +324,13 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function desaturate($percentage = 100) {
+    function desaturate($percentage = 100)
+    {
 
         // Determine percentage
         $percentage = $this->keep_within($percentage, 0, 100);
 
-        if( $percentage === 100 ) {
+        if ($percentage === 100) {
             imagefilter($this->image, IMG_FILTER_GRAYSCALE);
         } else {
             // Make a desaturated copy of the image
@@ -334,7 +343,6 @@ class SimpleImage{
             // Merge with specified percentage
             $this->imagecopymerge_alpha($this->image, $new, 0, 0, 0, 0, $this->width, $this->height, $percentage);
             imagedestroy($new);
-
         }
 
         return $this;
@@ -346,7 +354,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function edges() {
+    function edges()
+    {
         imagefilter($this->image, IMG_FILTER_EDGEDETECT);
         return $this;
     }
@@ -357,7 +366,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function emboss() {
+    function emboss()
+    {
         imagefilter($this->image, IMG_FILTER_EMBOSS);
         return $this;
     }
@@ -371,7 +381,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function fill($color = '#000000') {
+    function fill($color = '#000000')
+    {
 
         $rgba = $this->normalize_color($color);
         $fill_color = imagecolorallocatealpha($this->image, $rgba['r'], $rgba['g'], $rgba['b'], $rgba['a']);
@@ -380,7 +391,6 @@ class SimpleImage{
         imagefilledrectangle($this->image, 0, 0, $this->width, $this->height, $fill_color);
 
         return $this;
-
     }
 
     /**
@@ -391,13 +401,13 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function fit_to_height($height) {
+    function fit_to_height($height)
+    {
 
         $aspect_ratio = $this->height / $this->width;
         $width = $height / $aspect_ratio;
 
         return $this->resize($width, $height);
-
     }
 
     /**
@@ -408,13 +418,13 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function fit_to_width($width) {
+    function fit_to_width($width)
+    {
 
         $aspect_ratio = $this->height / $this->width;
         $height = $width * $aspect_ratio;
 
         return $this->resize($width, $height);
-
     }
 
     /**
@@ -425,7 +435,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function flip($direction) {
+    function flip($direction)
+    {
 
         $new = imagecreatetruecolor($this->width, $this->height);
         imagealphablending($new, false);
@@ -447,7 +458,6 @@ class SimpleImage{
         $this->image = $new;
 
         return $this;
-
     }
 
     /**
@@ -456,7 +466,8 @@ class SimpleImage{
      * @return int
      *
      */
-    function get_height() {
+    function get_height()
+    {
         return $this->height;
     }
 
@@ -466,7 +477,8 @@ class SimpleImage{
      * @return string   portrait|landscape|square
      *
      */
-    function get_orientation() {
+    function get_orientation()
+    {
 
         if (imagesx($this->image) > imagesy($this->image)) {
             return 'landscape';
@@ -477,7 +489,6 @@ class SimpleImage{
         }
 
         return 'square';
-
     }
 
     /**
@@ -493,7 +504,8 @@ class SimpleImage{
      * )</pre>
      *
      */
-    function get_original_info() {
+    function get_original_info()
+    {
         return $this->original_info;
     }
 
@@ -503,7 +515,8 @@ class SimpleImage{
      * @return int
      *
      */
-    function get_width() {
+    function get_width()
+    {
         return $this->width;
     }
 
@@ -513,7 +526,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function invert() {
+    function invert()
+    {
         imagefilter($this->image, IMG_FILTER_NEGATE);
         return $this;
     }
@@ -527,80 +541,83 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function load($filename) {
+    function load($filename)
+    {
         // Require GD library
         if (!extension_loaded('gd')) {
             throw new Exception('Required extension GD is not loaded.');
         }
         $this->filename = $filename;
-		if($this->storage){
-			$this->imgrow = $this->storage->getSingleRow('images',['FID'=>$this->filename]);
-			if($this->imgrow){
-				$this->loadSource($this->imgrow[0]);
-				switch($this->imgrow[0]['FContentType']){
-					case 'application/pdf':
-						$this->load_base64($this->imgrow[0]['FData'],'application/pdf');
-					break;
-					default:
-						$this->load_base64($this->imgrow[0]['FData']);
-					break;
-				}
-			}else{
-                throw new Exception('Object not found in database. (Ref: '.$this->filename.')');
+        if ($this->storage) {
+            $this->imgrow = $this->storage->getSingleRow('images', ['FID' => $this->filename]);
+            if ($this->imgrow) {
+                $this->loadSource($this->imgrow[0]);
+                switch ($this->imgrow[0]['FContentType']) {
+                    case 'application/pdf':
+                        $this->load_base64($this->imgrow[0]['FData'], 'application/pdf');
+                        break;
+                    default:
+                        $this->load_base64($this->imgrow[0]['FData']);
+                        break;
+                }
+            } else {
+                throw new Exception('Object not found in database. (Ref: ' . $this->filename . ')');
             }
-		}
+        }
         return $this->get_meta_data();
     }
 
-	function exist($filename){
-		if($this->storage){
-			if(is_array($filename)){
-				$clause = ['FID'=>$filename];
-				if(get_class($this->storage->getConnection())=='DBMongo'){
-					$clause =	['FID'=>['$in'=>$filename]];
-				}
-				$this->imgrow = $this->storage->getAllRow('images',$clause);
-				if($this->imgrow){
-					return $this->imgrow;
-				}
-				return false;
-			}
-			$this->imgrow = $this->storage->getSingleRow('images',['FID'=>$filename]);
-			if($this->imgrow){
-				return $this->imgrow[0];
-			}
-			return false;
-		}
-		return $this->get_meta_data();
-	}
+    function exist($filename)
+    {
+        if ($this->storage) {
+            if (is_array($filename)) {
+                $clause = ['FID' => $filename];
+                if (get_class($this->storage->getConnection()) == 'DBMongo') {
+                    $clause =    ['FID' => ['$in' => $filename]];
+                }
+                $this->imgrow = $this->storage->getAllRow('images', $clause);
+                if ($this->imgrow) {
+                    return $this->imgrow;
+                }
+                return false;
+            }
+            $this->imgrow = $this->storage->getSingleRow('images', ['FID' => $filename]);
+            if ($this->imgrow) {
+                return $this->imgrow[0];
+            }
+            return false;
+        }
+        return $this->get_meta_data();
+    }
 
-	function loadSource($source=null){
-		if(is_array($source)){
-			//convert into DB Field
-			$this->source['FID'] = $source['id'] ? $source['id'] : $source['FID'];
-			$this->source['FName'] = $source['name'] ? $source['name'] : $source['FName'];
-			$this->source['FContentType'] = $source['content_type'] ? $source['content_type'] : $source['FContentType'];
-			$this->source['FContentEncoded'] = $source['content_encoded'] ? $source['content_encoded'] : $source['FContentEncoded'];
-			$this->source['FData'] = $source['data'] ? $source['data'] : $source['FData'];
-			$this->source['FTag'] = $source['tag'] ? $source['tag'] : $source['FTag'];
-			$this->source['FGroup'] = $source['group'] ? $source['group'] : $source['FGroup'];
-			$this->source['FLastUpdate'] = $source['FLastUpdate'] ? $source['FLastUpdate'] : date('Y-m-d H:i:s');
-			$this->source['FCreateDate'] = $source['FCreateDate'] ? $source['FCreateDate'] : date('Y-m-d H:i:s');
-			if($source['with_commit']){
-				$this->source['FCommit'] = "0";
-			}
-			return $this;
-		}
-		else{
-			return "Error while load resource!";
-		}
-	}
-	
-	function getSource(){
-		
-		return $this->imgrow[0];
-	}
-	
+    function loadSource($source = null)
+    {
+        if (is_array($source)) {
+            //convert into DB Field
+            $this->source['FID'] = $source['id'] ? $source['id'] : $source['FID'];
+            $this->source['FName'] = $source['name'] ? $source['name'] : $source['FName'];
+            $this->source['FContentType'] = $source['content_type'] ? $source['content_type'] : $source['FContentType'];
+            $this->source['FContentEncoded'] = $source['content_encoded'] ? $source['content_encoded'] : $source['FContentEncoded'];
+            $this->source['FData'] = $source['data'] ? $source['data'] : $source['FData'];
+            $this->source['FTag'] = $source['tag'] ? $source['tag'] : $source['FTag'];
+            $this->source['FGroup'] = $source['group'] ? $source['group'] : $source['FGroup'];
+            $this->source['FLastUpdate'] = $source['FLastUpdate'] ? $source['FLastUpdate'] : date('Y-m-d H:i:s');
+            $this->source['FCreateDate'] = $source['FCreateDate'] ? $source['FCreateDate'] : date('Y-m-d H:i:s');
+            if ($source['with_commit']) {
+                $this->source['FCommit'] = "0";
+            }
+            return $this;
+        } else {
+            return "Error while load resource!";
+        }
+    }
+
+    function getSource()
+    {
+
+        return $this->imgrow[0];
+    }
+
     /**
      * Load a base64 string as image
      *
@@ -609,33 +626,34 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function load_base64($base64string, $contentType=null) {
+    function load_base64($base64string, $contentType = null)
+    {
         if (!extension_loaded('gd')) {
             throw new Exception('Required extension GD is not loaded.');
         }
         if (!$base64string) {
             throw new Exception('Image base64 string is null.');
         }
-		if($contentType) {
-			switch($contentType){
-				case 'application/pdf':
-					//remove data URI scheme and spaces from base64 string then decode it
-					$this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:application/[^;]+;base64,#', '', $base64string)));
-					//$this->image = imagecreatefromstring($this->imagestring);
-					//var_dump("ok");die;
-				break;
-				default:
-					//remove data URI scheme and spaces from base64 string then decode it
-					$this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
-					$this->image = imagecreatefromstring($this->imagestring);
-				break;
-			}
-		}else{
-			//remove data URI scheme and spaces from base64 string then decode it
-			$this->imagestring = base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
-			$this->image = imagecreatefromstring($this->imagestring);
-		}
-       
+        if ($contentType) {
+            switch ($contentType) {
+                case 'application/pdf':
+                    //remove data URI scheme and spaces from base64 string then decode it
+                    $this->imagestring = base64_decode(str_replace(' ', '+', preg_replace('#^data:application/[^;]+;base64,#', '', $base64string)));
+                    //$this->image = imagecreatefromstring($this->imagestring);
+                    //var_dump("ok");die;
+                    break;
+                default:
+                    //remove data URI scheme and spaces from base64 string then decode it
+                    $this->imagestring = base64_decode(str_replace(' ', '+', preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
+                    $this->image = imagecreatefromstring($this->imagestring);
+                    break;
+            }
+        } else {
+            //remove data URI scheme and spaces from base64 string then decode it
+            $this->imagestring = base64_decode(str_replace(' ', '+', preg_replace('#^data:image/[^;]+;base64,#', '', $base64string)));
+            $this->image = imagecreatefromstring($this->imagestring);
+        }
+
         return $this->get_meta_data();
     }
 
@@ -645,7 +663,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function mean_remove() {
+    function mean_remove()
+    {
         imagefilter($this->image, IMG_FILTER_MEAN_REMOVAL);
         return $this;
     }
@@ -658,7 +677,8 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function opacity($opacity) {
+    function opacity($opacity)
+    {
 
         // Determine opacity
         $opacity = $this->keep_within($opacity, 0, 1) * 100;
@@ -677,7 +697,6 @@ class SimpleImage{
         imagedestroy($copy);
 
         return $this;
-
     }
 
     /**
@@ -689,7 +708,8 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function output($format = null, $quality = null) {
+    function output($format = null, $quality = null)
+    {
 
         // Determine quality
         $quality = $quality ?: $this->quality;
@@ -702,7 +722,7 @@ class SimpleImage{
             case 'jpeg':
             case 'jpg':
                 if (!$this->image) {
-                    throw new Exception('Image property is null : '.$this->filename);
+                    throw new Exception('Image property is null : ' . $this->filename);
                 }
                 imageinterlace($this->image, true);
                 $mimetype = 'image/jpeg';
@@ -711,27 +731,27 @@ class SimpleImage{
                 $mimetype = 'image/png';
                 break;
             default:
-				if($this->source && isset($this->source["FContentType"])){
-					switch($this->source["FContentType"]){
-						case 'application/pdf' :
-							$mimetype = 'application/pdf';
-						break;
-						default;
-							$info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
-							$mimetype = $info['mime'];
-							unset($info);
-						break;
-					}
-				}else{
-					$info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
-					$mimetype = $info['mime'];
-					unset($info);
-				}
-				break;
+                if ($this->source && isset($this->source["FContentType"])) {
+                    switch ($this->source["FContentType"]) {
+                        case 'application/pdf':
+                            $mimetype = 'application/pdf';
+                            break;
+                        default;
+                            $info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
+                            $mimetype = $info['mime'];
+                            unset($info);
+                            break;
+                    }
+                } else {
+                    $info = (empty($this->imagestring)) ? getimagesize($this->filename) : getimagesizefromstring($this->imagestring);
+                    $mimetype = $info['mime'];
+                    unset($info);
+                }
+                break;
         }
 
         // Output the image
-        header('Content-Type: '.$mimetype);
+        header('Content-Type: ' . $mimetype);
         switch ($mimetype) {
             case 'image/gif':
                 imagegif($this->image);
@@ -742,11 +762,11 @@ class SimpleImage{
             case 'image/png':
                 imagepng($this->image, null, round(9 * $quality / 100));
                 break;
-			case 'application/pdf':
-				echo $this->imagestring;
-				break;
+            case 'application/pdf':
+                echo $this->imagestring;
+                break;
             default:
-                throw new Exception('Unsupported image format: '.$this->filename);
+                throw new Exception('Unsupported image format: ' . $this->filename);
                 break;
         }
     }
@@ -761,7 +781,8 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function output_base64($format = null, $quality = null) {
+    function output_base64($format = null, $quality = null)
+    {
 
         // Determine quality
         $quality = $quality ?: $this->quality;
@@ -774,7 +795,7 @@ class SimpleImage{
             case 'jpeg':
             case 'jpg':
                 if (!$this->image) {
-                    throw new Exception('Image property is null : '.$this->filename);
+                    throw new Exception('Image property is null : ' . $this->filename);
                 }
                 imageinterlace($this->image, true);
                 $mimetype = 'image/jpeg';
@@ -782,7 +803,7 @@ class SimpleImage{
             case 'png':
                 $mimetype = 'image/png';
                 break;
-			case 'pdf':
+            case 'pdf':
                 $mimetype = 'application/pdf';
                 break;
             default:
@@ -804,19 +825,18 @@ class SimpleImage{
             case 'image/png':
                 imagepng($this->image, null, round(9 * $quality / 100));
                 break;
-			case 'application/pdf':
+            case 'application/pdf':
                 echo $this->imagestring;
                 break;
             default:
-                throw new Exception('Unsupported image format: '.$this->filename);
+                throw new Exception('Unsupported image format: ' . $this->filename);
                 break;
         }
         $image_data = ob_get_contents();
         ob_end_clean();
 
         // Returns formatted string for img src
-        return 'data:'.$mimetype.';base64,'.base64_encode($image_data);
-
+        return 'data:' . $mimetype . ';base64,' . base64_encode($image_data);
     }
 
     /**
@@ -833,10 +853,11 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function overlay($overlay, $position = 'center', $opacity = 1, $x_offset = 0, $y_offset = 0) {
+    function overlay($overlay, $position = 'center', $opacity = 1, $x_offset = 0, $y_offset = 0)
+    {
 
         // Load overlay image
-        if( !($overlay instanceof SimpleImage) ) {
+        if (!($overlay instanceof SimpleImage)) {
             $overlay = new SimpleImage($overlay);
         }
 
@@ -888,7 +909,6 @@ class SimpleImage{
         $this->imagecopymerge_alpha($this->image, $overlay->image, $x, $y, 0, 0, $overlay->width, $overlay->height, $opacity);
 
         return $this;
-
     }
 
     /**
@@ -899,7 +919,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function pixelate($block_size = 10) {
+    function pixelate($block_size = 10)
+    {
         imagefilter($this->image, IMG_FILTER_PIXELATE, $block_size, true);
         return $this;
     }
@@ -913,12 +934,13 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function resize($width, $height) {
+    function resize($width, $height)
+    {
 
         // Generate new GD image
         $new = imagecreatetruecolor($width, $height);
 
-        if( $this->original_info['format'] === 'gif' ) {
+        if ($this->original_info['format'] === 'gif') {
             // Preserve transparency in GIFs
             $transparent_index = imagecolortransparent($this->image);
             $palletsize = imagecolorstotal($this->image);
@@ -943,7 +965,6 @@ class SimpleImage{
         $this->image = $new;
 
         return $this;
-
     }
 
     /**
@@ -956,12 +977,13 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function rotate($angle, $bg_color = '#000000') {
+    function rotate($angle, $bg_color = '#000000')
+    {
 
         // Perform the rotation
         $rgba = $this->normalize_color($bg_color);
         $bg_color = imagecolorallocatealpha($this->image, $rgba['r'], $rgba['g'], $rgba['b'], $rgba['a']);
-        $new = imagerotate($this->image, -($this->keep_within($angle, -360, 360)), $bg_color);
+        $new = imagerotate($this->image, - ($this->keep_within($angle, -360, 360)), $bg_color);
         imagesavealpha($new, true);
         imagealphablending($new, true);
 
@@ -971,48 +993,47 @@ class SimpleImage{
         $this->image = $new;
 
         return $this;
-
     }
-	
-	function setStorage($storage){
-		$this->storage = $storage;
-		
-		return $this;
-	}
-	
-	function delete($source=null){
-		//define if want to save image into database storage :
-		if($this->storage && $source){
-			
-			$result = $this->storage->deleteRow('images',$source);
-			if($result){
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-		else{
-			return false;
-		}
-	}
 
-	function commit($source=null){
-		//define if want to save image into database storage :
-		if($this->storage && $source){
-			
-			$result = $this->storage->update('images',["FCommit"=>"1"],$source);
-			if($result){
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-		else{
-			return false;
-		}
-	}
+    function setStorage($storage)
+    {
+        $this->storage = $storage;
+
+        return $this;
+    }
+
+    function delete($source = null)
+    {
+        //define if want to save image into database storage :
+        if ($this->storage && $source) {
+
+            $result = $this->storage->deleteRow('images', $source);
+            if ($result) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    function commit($source = null)
+    {
+        //define if want to save image into database storage :
+        if ($this->storage && $source) {
+
+            $result = $this->storage->update('images', ["FCommit" => "1"], $source);
+            if ($result) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Save an image
      *
@@ -1026,29 +1047,33 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function save($filename = null, $quality = null, $format = null) {
-		
-		//define if want to save image into database storage :
-		if($this->storage && $this->source){
-			if(!$this->source['FContentType']){
-				$info = getimagesizefromstring(base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $this->source['FData']))));
+    function save($filename = null, $quality = null, $format = null)
+    {
+
+        //define if want to save image into database storage :
+        if ($this->storage && $this->source) {
+            //$info = getimagesizefromstring(base64_decode(str_replace(' ', '+',preg_replace('#^data:image/[^;]+;base64,#', '', $this->source['FData']))));
+            $info = getimagesizefromstring(base64_decode(str_replace(' ', '+', preg_replace('#^data:[^;]+/[^;]+;base64,#', '', $this->source['FData']))));
+            if (!$info && $this->source['FContentType'] != "application/pdf") {
+                throw new Exception('Invalid base64 content string.');
+            }
+            if (!$this->source['FContentType']) {
                 $mimetype = $info['mime'];
                 unset($info);
-				$this->source['FContentType'] = $mimetype;
-			}
-			$result = $this->storage->insert('images',$this->source);
-			if($result){
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-		
+                $this->source['FContentType'] = $mimetype;
+            }
+            $result = $this->storage->insert('images', $this->source);
+            if ($result) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         // Determine quality, filename, and format
         $quality = $quality ?: $this->quality;
         $filename = $filename ?: $this->filename;
-        if( !$format ) {
+        if (!$format) {
             $format = $this->file_ext($filename) ?: $this->original_info['format'];
         }
 
@@ -1060,7 +1085,7 @@ class SimpleImage{
             case 'jpg':
             case 'jpeg':
                 if (!$this->image) {
-                    throw new Exception('Image property is null : '.$this->filename);
+                    throw new Exception('Image property is null : ' . $this->filename);
                 }
                 imageinterlace($this->image, true);
                 $result = imagejpeg($this->image, $filename, round($quality));
@@ -1077,7 +1102,6 @@ class SimpleImage{
         }
 
         return $this;
-
     }
 
     /**
@@ -1086,7 +1110,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function sepia() {
+    function sepia()
+    {
         imagefilter($this->image, IMG_FILTER_GRAYSCALE);
         imagefilter($this->image, IMG_FILTER_COLORIZE, 100, 50, 0);
         return $this;
@@ -1098,7 +1123,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function sketch() {
+    function sketch()
+    {
         imagefilter($this->image, IMG_FILTER_MEAN_REMOVAL);
         return $this;
     }
@@ -1111,7 +1137,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function smooth($level) {
+    function smooth($level)
+    {
         imagefilter($this->image, IMG_FILTER_SMOOTH, $this->keep_within($level, -10, 10));
         return $this;
     }
@@ -1131,7 +1158,8 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    function text($text, $font_file, $font_size = 12, $color = '#000000', $position = 'center', $x_offset = 0, $y_offset = 0, $stroke_color = null, $stroke_size = null) {
+    function text($text, $font_file, $font_size = 12, $color = '#000000', $position = 'center', $x_offset = 0, $y_offset = 0, $stroke_color = null, $stroke_size = null)
+    {
 
         // todo - this method could be improved to support the text angle
         $angle = 0;
@@ -1143,7 +1171,7 @@ class SimpleImage{
         // Determine textbox size
         $box = imagettfbbox($font_size, $angle, $font_file, $text);
         if (!$box) {
-            throw new Exception('Unable to load font: '.$font_file);
+            throw new Exception('Unable to load font: ' . $font_file);
         }
         $box_width = abs($box[6] - $box[2]);
         $box_height = abs($box[7] - $box[1]);
@@ -1192,7 +1220,7 @@ class SimpleImage{
         // Add the text
         imagesavealpha($this->image, true);
         imagealphablending($this->image, true);
-        if( isset($stroke_color) && isset($stroke_size) ) {
+        if (isset($stroke_color) && isset($stroke_size)) {
             // Text with stroke
             $rgba = $this->normalize_color($color);
             $stroke_color = imagecolorallocatealpha($this->image, $rgba['r'], $rgba['g'], $rgba['b'], $rgba['a']);
@@ -1203,7 +1231,6 @@ class SimpleImage{
         }
 
         return $this;
-
     }
 
     /**
@@ -1218,7 +1245,8 @@ class SimpleImage{
      * @return SimpleImage
      *
      */
-    function thumbnail($width, $height = null) {
+    function thumbnail($width, $height = null)
+    {
 
         // Determine height
         $height = $height ?: $width;
@@ -1238,7 +1266,6 @@ class SimpleImage{
 
         // Return trimmed image
         return $this->crop($left, $top, $width + $left, $height + $top);
-
     }
 
     /**
@@ -1249,14 +1276,14 @@ class SimpleImage{
      * @return string
      *
      */
-    protected function file_ext($filename) {
+    protected function file_ext($filename)
+    {
 
         if (!preg_match('/\./', $filename)) {
             return '';
         }
 
         return preg_replace('/^.*\./', '', $filename);
-
     }
 
     /**
@@ -1268,23 +1295,24 @@ class SimpleImage{
      * @throws Exception
      *
      */
-    protected function get_meta_data() {
-		//filter content type :
-		if($this->source && isset($this->source["FContentType"])){
-			switch($this->source["FContentType"]){
-				case 'application/pdf' :
-					return $this;
-				break;
-				default;
-				break;
-			}
-		}
-		
+    protected function get_meta_data()
+    {
+        //filter content type :
+        if ($this->source && isset($this->source["FContentType"])) {
+            switch ($this->source["FContentType"]) {
+                case 'application/pdf':
+                    return $this;
+                    break;
+                default;
+                    break;
+            }
+        }
+
         //gather meta data
-        if(empty($this->imagestring)) {
-			if(file_exists($this->filename)){
-				$info = getimagesize($this->filename);
-			}
+        if (empty($this->imagestring)) {
+            if (file_exists($this->filename)) {
+                $info = getimagesize($this->filename);
+            }
             switch ($info['mime']) {
                 case 'image/gif':
                     $this->image = imagecreatefromgif($this->filename);
@@ -1296,7 +1324,7 @@ class SimpleImage{
                     $this->image = imagecreatefrompng($this->filename);
                     break;
                 default:
-                    throw new Exception('Invalid image: '.$this->filename);
+                    throw new Exception('Invalid image: ' . $this->filename);
                     break;
             }
         } elseif (function_exists('getimagesizefromstring')) {
@@ -1320,7 +1348,6 @@ class SimpleImage{
         imagealphablending($this->image, true);
 
         return $this;
-
     }
 
     /**
@@ -1339,7 +1366,8 @@ class SimpleImage{
      * @link http://www.php.net/manual/en/function.imagecopymerge.php#88456
      *
      */
-    protected function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct) {
+    protected function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h, $pct)
+    {
 
         // Get image width and height and percentage
         $pct /= 100;
@@ -1387,7 +1415,6 @@ class SimpleImage{
         imagesavealpha($src_im, true);
         imagealphablending($src_im, true);
         imagecopy($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, $src_w, $src_h);
-
     }
 
     /**
@@ -1407,9 +1434,10 @@ class SimpleImage{
      * @return array                This method has the same return values as imagettftext()
      *
      */
-    protected function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $stroke_size, $fontfile, $text) {
-        for( $c1 = ($x - abs($stroke_size)); $c1 <= ($x + abs($stroke_size)); $c1++ ) {
-            for($c2 = ($y - abs($stroke_size)); $c2 <= ($y + abs($stroke_size)); $c2++) {
+    protected function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $stroke_size, $fontfile, $text)
+    {
+        for ($c1 = ($x - abs($stroke_size)); $c1 <= ($x + abs($stroke_size)); $c1++) {
+            for ($c2 = ($y - abs($stroke_size)); $c2 <= ($y + abs($stroke_size)); $c2++) {
                 $bg = imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
             }
         }
@@ -1428,7 +1456,8 @@ class SimpleImage{
      * @return int|float
      *
      */
-    protected function keep_within($value, $min, $max) {
+    protected function keep_within($value, $min, $max)
+    {
 
         if ($value < $min) {
             return $min;
@@ -1439,7 +1468,6 @@ class SimpleImage{
         }
 
         return $value;
-
     }
 
     /**
@@ -1451,7 +1479,8 @@ class SimpleImage{
      * @return array|bool
      *
      */
-    protected function normalize_color($color) {
+    protected function normalize_color($color)
+    {
 
         if (is_string($color)) {
 
@@ -1459,15 +1488,15 @@ class SimpleImage{
 
             if (strlen($color) == 6) {
                 list($r, $g, $b) = array(
-                    $color[0].$color[1],
-                    $color[2].$color[3],
-                    $color[4].$color[5]
+                    $color[0] . $color[1],
+                    $color[2] . $color[3],
+                    $color[4] . $color[5]
                 );
             } elseif (strlen($color) == 3) {
                 list($r, $g, $b) = array(
-                    $color[0].$color[0],
-                    $color[1].$color[1],
-                    $color[2].$color[2]
+                    $color[0] . $color[0],
+                    $color[1] . $color[1],
+                    $color[2] . $color[2]
                 );
             } else {
                 return false;
@@ -1478,7 +1507,6 @@ class SimpleImage{
                 'b' => hexdec($b),
                 'a' => 0
             );
-
         } elseif (is_array($color) && (count($color) == 3 || count($color) == 4)) {
 
             if (isset($color['r'], $color['g'], $color['b'])) {
@@ -1496,11 +1524,7 @@ class SimpleImage{
                     'a' => $this->keep_within(isset($color[3]) ? $color[3] : 0, 0, 127)
                 );
             }
-
         }
         return false;
     }
-
 }
-
-?>
