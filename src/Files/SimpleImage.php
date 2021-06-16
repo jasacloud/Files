@@ -28,7 +28,7 @@ class SimpleImage
      */
     public $quality = 80;
 
-    protected $image, $filename, $original_info, $width, $height, $imagestring, $storage, $source, $imgrow;
+    protected $image, $filename, $original_info, $width, $height, $imagestring, $storage, $storage_suffix, $source, $imgrow;
 
     /**
      * Create instance and load an image, or create an image from scratch
@@ -549,7 +549,11 @@ class SimpleImage
         }
         $this->filename = $filename;
         if ($this->storage) {
-            $this->imgrow = $this->storage->getSingleRow('images', ['FID' => $this->filename]);
+            $table = 'images';
+            if($this->storage_suffix && $this->storage_suffix != ""){
+                $table =  $table . "." . $this->storage_suffix;
+            }
+            $this->imgrow = $this->storage->getSingleRow($table, ['FID' => $this->filename]);
             if ($this->imgrow) {
                 $this->loadSource($this->imgrow[0]);
                 switch ($this->imgrow[0]['FContentType']) {
@@ -570,18 +574,22 @@ class SimpleImage
     function exist($filename)
     {
         if ($this->storage) {
+            $table = 'images';
+            if($this->storage_suffix && $this->storage_suffix != ""){
+                $table =  $table . "." . $this->storage_suffix;
+            }
             if (is_array($filename)) {
                 $clause = ['FID' => $filename];
                 if (get_class($this->storage->getConnection()) == 'DBMongo') {
                     $clause =    ['FID' => ['$in' => $filename]];
                 }
-                $this->imgrow = $this->storage->getAllRow('images', $clause);
+                $this->imgrow = $this->storage->getAllRow($table, $clause);
                 if ($this->imgrow) {
                     return $this->imgrow;
                 }
                 return false;
             }
-            $this->imgrow = $this->storage->getSingleRow('images', ['FID' => $filename]);
+            $this->imgrow = $this->storage->getSingleRow($table, ['FID' => $filename]);
             if ($this->imgrow) {
                 return $this->imgrow[0];
             }
@@ -1002,12 +1010,22 @@ class SimpleImage
         return $this;
     }
 
+    function setStorageSuffix($suffix="")
+    {
+        $this->storage_suffix = $suffix;
+
+        return $this;
+    }
+
     function delete($source = null)
     {
         //define if want to save image into database storage :
         if ($this->storage && $source) {
-
-            $result = $this->storage->deleteRow('images', $source);
+            $table = 'images';
+            if($this->storage_suffix && $this->storage_suffix != ""){
+                $table =  $table . "." . $this->storage_suffix;
+            }
+            $result = $this->storage->deleteRow($table, $source);
             if ($result) {
                 return true;
             } else {
@@ -1022,8 +1040,11 @@ class SimpleImage
     {
         //define if want to save image into database storage :
         if ($this->storage && $source) {
-
-            $result = $this->storage->update('images', ["FCommit" => "1"], $source);
+            $table = 'images';
+            if($this->storage_suffix && $this->storage_suffix != ""){
+                $table =  $table . "." . $this->storage_suffix;
+            }
+            $result = $this->storage->update($table, ["FCommit" => "1"], $source);
             if ($result) {
                 return true;
             } else {
@@ -1062,7 +1083,11 @@ class SimpleImage
                 unset($info);
                 $this->source['FContentType'] = $mimetype;
             }
-            $result = $this->storage->insert('images', $this->source);
+            $table = 'images';
+            if($this->storage_suffix && $this->storage_suffix != ""){
+                $table =  $table . "." . $this->storage_suffix;
+            }
+            $result = $this->storage->insert($table, $this->source);
             if ($result) {
                 return true;
             } else {
