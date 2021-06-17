@@ -565,7 +565,8 @@ class SimpleImage
                         break;
                 }
             } else {
-                throw new Exception('Object not found in database. (Ref: ' . $this->filename . ')');
+                $ref = $this->filename . ($this->storage_suffix && $this->storage_suffix != "" ? "|".$this->storage_suffix : "");
+                throw new Exception('Object not found in database. (Ref: ' . $ref . ')');
             }
         }
         return $this->get_meta_data();
